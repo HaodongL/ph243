@@ -86,7 +86,7 @@ run_simu <- function(f_simu = simu_para,
     res_halest <- run_est(data = simu_data, 
                           node_list = nodes, 
                           gbound = 0.025, 
-                          fancy_stack = sl_stack)
+                          fancy_stack = hal_stack)
     
     #--- SL res
     df_res_sl <- extract_res(allres = res_slest)
