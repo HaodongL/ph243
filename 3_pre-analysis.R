@@ -1,4 +1,4 @@
-
+library(here)
 source(paste0(here(), "/0_config.R"))
 source(paste0(here(), "/1_hal_undersmooth.R"))
 
@@ -22,10 +22,11 @@ calc_true_para <- function(n = 5*10^4){
   return(psi_true)
 }
 
-true_ate_para <- calc_true_para(n = 5*10^4)
+set.seed(123)
+true_ate_para <- calc_true_para(n = 10^5)
 
 
-#----- 2. hal
+#----- 2. undersmoothed hal
 df <- clean_df(df = washb_data, 
                n_covar = 3, 
                outcome = "whz", 
@@ -129,6 +130,59 @@ res_hal <- list("g_fit_hal" = g_fit,
 
 # saveRDS(res_hal, paste0(here(), "/results/res_hal.RDS"))
 # res_hal <- readRDS(paste0(here(), "/results/res_hal.RDS"))
+
+
+# #----- 2.5 regular hal
+# df <- clean_df(df = washb_data, 
+#                n_covar = 3, 
+#                outcome = "whz", 
+#                trt = "tr")
+# 
+# covars <- setdiff(names(df), c("Y", "A"))
+# 
+# 
+# # initialize the undersmoothing procedure
+# 
+# # fit g (you can skip this part and directly read the saved .RDS below)
+# outcome <- df$A
+# x <- as.matrix(df %>% select(-c("A", "Y")))
+# # initial hal fit  
+# g_fit <- fit_hal(X = x, Y = outcome, smoothness_orders = 0, family = "binomial")
+# 
+# # fit Q
+# outcome <- df$Y
+# x <- as.matrix(df %>% select(-c("Y")))
+# # initial hal fit  
+# Q_fit <- fit_hal(X = x, Y = outcome, smoothness_orders = 0, family = "gaussian")
+# 
+# # generate a large sample with this distributions and calculate the truth
+# large_data <- dplyr::sample_n(df, size = 10^5, replace = TRUE)
+# 
+# a_preds <- predict(g_fit, new_data = large_data %>% select(-c("A","Y")))
+# 
+# # generate A
+# large_data$A <- rbinom(length(a_preds), 1, prob = a_preds)
+# 
+# df0 <- large_data %>% mutate(A = 0)
+# df1 <- large_data %>% mutate(A = 1)
+# 
+# y_preds <- predict(Q_fit, new_data = large_data %>% select(-"Y"))
+# y1_preds <- predict(Q_fit, new_data = df1 %>% select(-"Y"))
+# y0_preds <- predict(Q_fit, new_data = df0 %>% select(-"Y"))
+# 
+# # ate
+# true_ate_hal <- mean(y1_preds - y0_preds)
+# rv_hal <- sum((y_preds - large_data$Y)^2)/length(y_preds)
+# 
+# # save the res
+# res_hal <- list("g_fit_hal" = g_fit,
+#                 "Q_fit_hal" = Q_fit,
+#                 "true_ate_hal" = true_ate_hal,
+#                 "rv_hal" = rv_hal)
+# 
+# # saveRDS(res_hal, paste0(here(), "/results/res_hal.RDS"))
+# # res_hal <- readRDS(paste0(here(), "/results/res_hal.RDS"))
+
 
 
 

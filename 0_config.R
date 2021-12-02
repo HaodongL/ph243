@@ -1,4 +1,4 @@
-
+rm(list=ls())
 # ----------------------------------------
 # Packages
 # ----------------------------------------
@@ -13,8 +13,9 @@ library(knitr)
 library(kableExtra)
 library(hal9001)
 library(glmnet)
-library(here)
-
+library(doParallel)
+library(future)
+library(tictoc)
 
 # ----------------------------------------
 # Sl set up
@@ -45,7 +46,7 @@ xgb_learners <- apply(grid, MARGIN = 1, function(params_tune) {
 sl_stack <- make_learner(Stack, 
                          lrn_glm,
                          lrn_elastic,
-                         lrn_spline,
+                         # lrn_spline,
                          xgb_learners[[1]],
                          xgb_learners[[20]],
                          xgb_learners[[30]],
@@ -53,8 +54,8 @@ sl_stack <- make_learner(Stack,
 
 hal_stack <- make_learner(Stack, 
                           lrn_hal_s0,
-                          lrn_hal_m0,
-                          lrn_hal_m1)
+                          lrn_hal_m0) 
+                          
 
 # ----------------------------------------
 # Data cleaning

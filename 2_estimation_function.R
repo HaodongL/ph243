@@ -1,5 +1,5 @@
 # ------------------------------------------------------------
-# TMLE (SL/HAL), CV-TMLE (SL/HAL), CV-AIPTW (HAL), HAL-MLE (HAL)
+# TMLE (SL/HAL), CV-TMLE (SL/HAL), CV-AIPTW (SL/HAL), ?HAL-MLE (HAL)
 # ------------------------------------------------------------
 run_est <- function(data, node_list, gbound = 0.025, fancy_stack = sl_stack){
   
@@ -52,14 +52,103 @@ run_est <- function(data, node_list, gbound = 0.025, fancy_stack = sl_stack){
   g1W_cv <- bounded_likelihood$get_likelihood(cf_task1, "A", fold_number="validation")
   
   # 3. CV-AIPTW
-  psi_cvaipw <- mean(a*(y-Qbar1W_cv)/g1W_cv + Qbar1W_cv) - mean((1-a)*(y-Qbar0W_cv)/(1-g1W_cv) + Qbar0W_cv)
-  ic_cvaipw <- (y - QbarAW_cv) * ((a/g1W_cv) - (1 - a)/(1 - g1W_cv)) + (Qbar1W_cv - Qbar0W_cv) - psi_cvaipw
-  
+  a <- data$A
+  y <- data$Y
+  psi_cvaiptw <- mean(a*(y-Qbar1W_cv)/g1W_cv + Qbar1W_cv) - mean((1-a)*(y-Qbar0W_cv)/(1-g1W_cv) + Qbar0W_cv)
+  ic_cvaiptw <- (y - QbarAW_cv) * ((a/g1W_cv) - (1 - a)/(1 - g1W_cv)) + (Qbar1W_cv - Qbar0W_cv) - psi_cvaiptw
   
   return(list("tmle_fit" = tmle_fit,
               "cvtmle_fit" = cvtmle_fit,
-              "psi_cvaipw" = psi_cvaipw,
-              "ic_cvaipw" = ic_cvaipw,
-              "Qbar1W" = Qbar1W,
-              "Qbar0W" = Qbar0W))
+              "psi_cvaiptw" = psi_cvaiptw,
+              "ic_cvaiptw" = ic_cvaiptw)
+         )
 }
+
+
+
+run_simu <- function(f_simu = simu_para, 
+                     psi_true = 0.1153, 
+                     n_sample = 500, 
+                     N_round = 3){
+  
+  res_simu <- foreach(i = 1:N_round, .combine = 'rbind') %dopar% {
+    cat('Starting ', i, 'th job.\n', sep = '')
+    simu_data <- f_simu(n = n_sample)
+    nodes <- list(W = setdiff(names(simu_data), c("A", "Y")),
+                  A = "A",
+                  Y = "Y")
+    
+    res_slest <- run_est(data = simu_data, 
+                         node_list = nodes, 
+                         gbound = 0.025, 
+                         fancy_stack = sl_stack)
+    
+    res_halest <- run_est(data = simu_data, 
+                          node_list = nodes, 
+                          gbound = 0.025, 
+                          fancy_stack = hal_stack)
+    
+    #--- SL res
+    tic()
+    df_res_sl <- extract_res(allres = res_slest)
+    names(df_res_sl) <- paste0(names(df_res_sl), "_sl")
+    toc()
+    
+    #--- HAL res
+    tic()
+    df_res_hal <- extract_res(allres = res_halest)
+    names(df_res_hal) <- paste0(names(df_res_hal), "_hal")
+    toc()
+    
+    df_res_all <- cbind("i" = i,
+                        "psi_true" = psi_true,
+                        df_res_sl,
+                        df_res_hal)
+    df_res_all
+  }
+  return(res_simu)
+}
+
+
+extract_res <- function(allres){
+  # TMLE
+  tmle_output <- allres$tmle_fit
+  tmle <- tmle_output$summary$tmle_est
+  tmle_se <- tmle_output$summary$se
+  tmle_lower <- tmle_output$summary$lower
+  tmle_upper <- tmle_output$summary$upper
+  rm(tmle_output)
+  
+  # CVTMLE 
+  cvtmle_output <- allres$cvtmle_fit
+  cvtmle <- cvtmle_output$summary$tmle_est
+  cvtmle_se <- cvtmle_output$summary$se
+  cvtmle_lower <- cvtmle_output$summary$lower
+  cvtmle_upper <- cvtmle_output$summary$upper
+  rm(cvtmle_output)
+  
+  # CV-AIPTW 
+  cvaiptw <- allres$psi_cvaiptw
+  ic_cvaiptw <- allres$ic_cvaiptw
+  
+  cvaiptw_se <- sd(ic_cvaiptw)
+  cvaiptw_upper <- cvaiptw + (1.96 * cvaiptw_se / sqrt(length(ic_cvaiptw)))
+  cvaiptw_lower <- cvaiptw - (1.96 * cvaiptw_se / sqrt(length(ic_cvaiptw)))
+  
+  df <- data.frame('tmle' = tmle, 
+                   'tmle_se' = tmle_se, 
+                   'tmle_lower' = tmle_lower, 
+                   'tmle_upper' = tmle_upper, 
+                   'cvtmle' = cvtmle, 
+                   'cvtmle_se' = cvtmle_se,
+                   'cvtmle_lower' = cvtmle_lower, 
+                   'cvtmle_upper' = cvtmle_upper, 
+                   'cvaiptw' = cvaiptw , 
+                   'cvaiptw_se' = cvaiptw_se, 
+                   'cvaiptw_lower' = cvaiptw_lower, 
+                   'cvaiptw_upper' = cvaiptw_upper)
+  return(df)
+}
+
+
+

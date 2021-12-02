@@ -1,4 +1,7 @@
-source(paste0(here(), "/hal_undersmooth.R"))
+library(here)
+source(paste0(here(), "/0_config.R"))
+source(paste0(here(), "/1_hal_undersmooth.R"))
+source(paste0(here(), "/2_estimation_function.R"))
 
 ##############################################################
 
@@ -9,6 +12,10 @@ source(paste0(here(), "/hal_undersmooth.R"))
 # ----------------------------------------
 # simulation with parametric models
 # ----------------------------------------
+temp <- run_simu(f_simu = simu_para, 
+                 psi_true = 0.1153, 
+                 n_sample = 500, 
+                 N_round = 2)
 
 # ----------------------------------------
 # real data based simulation with undersmoothed HAL
@@ -22,26 +29,9 @@ source(paste0(here(), "/hal_undersmooth.R"))
 
 
 
-##############################################################
-
-# Part.2 Estimation
-
-##############################################################
-
-
-
 
 ###############################
 
-# Part.3 Inference
-
-###############################
-
-
-
-
-###############################
-
-# Part.4 Evaluation
+# Part.2 Evaluation
 
 ###############################
