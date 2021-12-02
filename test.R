@@ -12,10 +12,12 @@ cl = makeCluster(workers, type = "SOCK")
 plan(cluster, workers = cl)
 
 
+# registerDoFuture()
+# plan(multisession, workers=floor(4))
 res <- run_simu(f_simu = simu_para, 
                  psi_true = 0.1153, 
                  n_sample = 500, 
-                 N_round = 4)
+                 N_round = 8)
 
 
 output_filename <- paste0('~/Repo/ph243/results/', "test_", Sys.Date(), '.csv')

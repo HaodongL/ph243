@@ -71,7 +71,7 @@ run_simu <- function(f_simu = simu_para,
                      n_sample = 500, 
                      N_round = 3){
   
-  res_simu <- foreach(i = 1:N_round, .combine = 'rbind') %dopar% {
+  res_simu <- foreach(i = 1:N_round, .combine = 'rbind') %dorng% {
     cat('Starting ', i, 'th job.\n', sep = '')
     simu_data <- f_simu(n = n_sample)
     nodes <- list(W = setdiff(names(simu_data), c("A", "Y")),
@@ -89,16 +89,12 @@ run_simu <- function(f_simu = simu_para,
                           fancy_stack = hal_stack)
     
     #--- SL res
-    tic()
     df_res_sl <- extract_res(allres = res_slest)
     names(df_res_sl) <- paste0(names(df_res_sl), "_sl")
-    toc()
     
     #--- HAL res
-    tic()
     df_res_hal <- extract_res(allres = res_halest)
     names(df_res_hal) <- paste0(names(df_res_hal), "_hal")
-    toc()
     
     df_res_all <- cbind("i" = i,
                         "psi_true" = psi_true,

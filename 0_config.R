@@ -15,7 +15,10 @@ library(hal9001)
 library(glmnet)
 library(doParallel)
 library(future)
+library(doFuture)
 library(tictoc)
+library(doRNG)
+
 
 # ----------------------------------------
 # Sl set up
