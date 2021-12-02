@@ -10,7 +10,6 @@ library(origami)
 library(sl3)
 library(tmle3)
 library(knitr)
-library(kableExtra)
 library(hal9001)
 library(glmnet)
 library(doParallel)
@@ -49,7 +48,7 @@ xgb_learners <- apply(grid, MARGIN = 1, function(params_tune) {
 sl_stack <- make_learner(Stack, 
                          lrn_glm,
                          lrn_elastic,
-                         # lrn_spline,
+                         lrn_earth,
                          xgb_learners[[1]],
                          xgb_learners[[20]],
                          xgb_learners[[30]],
