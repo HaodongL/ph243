@@ -27,13 +27,15 @@ true_ate_para <- calc_true_para(n = 10^5)
 
 
 #----- 2. undersmoothed hal
-df <- clean_df(df = washb_data, 
-               n_covar = 3, 
-               outcome = "whz", 
-               trt = "tr")
+# set.seed(123)
+# df <- clean_df(df = washb_data, 
+#                n_covar = 3, 
+#                outcome = "whz", 
+#                trt = "tr")
+# write.csv(df, paste0('~/Repo/ph243/results/', "washb_clean", '.csv'), row.names = FALSE)
 
+df <- read.csv(paste0('~/Repo/ph243/results/', "washb_clean", '.csv'))
 covars <- setdiff(names(df), c("Y", "A"))
-
 
 # initialize the undersmoothing procedure
 
@@ -187,11 +189,7 @@ res_hal <- list("g_fit_hal" = g_fit,
 
 
 #----- 3. sl
-df <- clean_df(df = washb_data, 
-               n_covar = 3, 
-               outcome = "whz", 
-               trt = "tr")
-
+df <- read.csv(paste0('~/Repo/ph243/results/', "washb_clean", '.csv'))
 covars <- setdiff(names(df), c("Y", "A"))
 
 # fit g
@@ -201,7 +199,10 @@ task_a_train <- make_sl3_Task(data = df, covariates = covars,
 lrnr_sl_a <- make_learner(Lrnr_sl,
                           learners = sl_stack,
                           outcome_type = 'binomial',
-                          metalearner= discrete_sl_metalrn)
+                          metalearner= make_learner(
+                            Lrnr_solnp,
+                            loss_function = loss_loglik_binomial,
+                            learner_function = metalearner_logistic_binomial))
 
 lrnr_sl_a_fit <- lrnr_sl_a$train(task_a_train)
 
@@ -211,7 +212,8 @@ task_y_train <- make_sl3_Task(data = df, covariates = c(covars, "A"),
 
 lrnr_sl_y <- make_learner(Lrnr_sl,
                           learners = sl_stack,
-                          outcome_type = 'continuous')
+                          outcome_type = 'continuous',
+                          metalearner= make_learner(Lrnr_nnls))
 
 lrnr_sl_y_fit <- lrnr_sl_y$train(task_y_train)
 
@@ -256,8 +258,3 @@ res_sl <- list("g_fit_sl" = lrnr_sl_a_fit,
 # res_sl <- readRDS(paste0(here(), "/results/res_sl.RDS"))
 
 
-
-true_ate_sl <- calc_true_para(n = 5*10^4)
-
-
-tm <- glm("Y~.", data = df)

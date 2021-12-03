@@ -66,14 +66,21 @@ run_est <- function(data, node_list, gbound = 0.025, fancy_stack = sl_stack){
 
 
 
-run_simu <- function(f_simu = simu_para, 
-                     psi_true = 0.1153, 
+run_simu <- function(psi_true = 0.1153, 
                      n_sample = 500, 
-                     N_round = 3){
+                     N_round = 500,
+                     model_type = "para",
+                     df_list = NULL){
   
   res_simu <- foreach(i = 1:N_round, .combine = 'rbind') %dorng% {
     cat('Starting ', i, 'th job.\n', sep = '')
-    simu_data <- f_simu(n = n_sample)
+    
+    if (model_type == "para"){
+      simu_data <- simu_para(n = n_sample)
+    } else {
+      simu_data <- df_list[[i]]
+    }
+    
     nodes <- list(W = setdiff(names(simu_data), c("A", "Y")),
                   A = "A",
                   Y = "Y")

@@ -148,7 +148,8 @@ simu_para <- function(n = 500){
 }
 
 # helper function for simulating data via hal/sl fit from real data
-simu_nonp <- function(df, covars, g_fit, Q_fit, rv, model_type, n = 500){
+simu_nonp <- function(n = 500, df, g_fit, Q_fit, rv, model_type){
+  covars <- setdiff(names(df), c("A","Y"))
   # simulate W from the empirical distribution of W in the real data
   simu_data <- dplyr::sample_n(df, size = n, replace = TRUE)
   
