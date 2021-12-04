@@ -1,8 +1,10 @@
+library(dplyr)
 
 # para simu
-res_para_500 <- read.csv(paste0('~/Repo/ph243/results/', "test_", "2021-12-02", '.csv'))
+res_para_500 <- read.csv(paste0('~/Repo/ph243/results/', "para_500_", "2021-12-02", '.csv'))
+res_para_1000 <- read.csv(paste0('~/Repo/ph243/results/', "para_1000_", "2021-12-03", '.csv'))
 
-table_results_data <- res_para_500 %>%
+table_results_data <- res_para_1000 %>%
   dplyr::mutate(tmle_proportion_sl = psi_true <= tmle_upper_sl & psi_true >= tmle_lower_sl,
                 cvtmle_proportion_sl = psi_true <= cvtmle_upper_sl & psi_true >= cvtmle_lower_sl,
                 cvaiptw_proportion_sl = psi_true <= cvaiptw_upper_sl & psi_true >= cvaiptw_lower_sl,

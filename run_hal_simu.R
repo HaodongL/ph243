@@ -4,7 +4,7 @@ source(paste0(here(), "/1_hal_undersmooth.R"))
 source(paste0(here(), "/2_estimation_function.R"))
 
 registerDoFuture()
-nCoresPerNode <- floor(as.numeric(Sys.getenv("SLURM_CPUS_ON_NODE"))/4)
+nCoresPerNode <- floor(as.numeric(Sys.getenv("SLURM_CPUS_ON_NODE"))/2)
 nodeNames <-strsplit(Sys.getenv("SLURM_NODELIST"), ",")[[1]]
 workers <- rep(nodeNames, each=nCoresPerNode)
 cl = makeCluster(workers, type = "SOCK")
@@ -31,7 +31,7 @@ for (i in 1:N_round){
                             df = df, 
                             g_fit = res_hal$g_fit_hal, 
                             Q_fit = res_hal$Q_fit_hal, 
-                            rv = rv <- res_hal$rv_hal , 
+                            rv = res_hal$rv_hal , 
                             model_type = "hal")
 }
 
