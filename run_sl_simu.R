@@ -17,16 +17,19 @@ res_sl <- readRDS(paste0(here(), "/results/res_sl.RDS"))
 N_round = 500
 n_sample = 500
 
-df_list <- list()
-for (i in 1:N_round){
-  df_list[[i]] <- simu_nonp(n = n_sample, 
-                            df = df, 
-                            g_fit = res_sl$g_fit_sl, 
-                            Q_fit = res_sl$Q_fit_sl, 
-                            rv = res_sl$rv_sl , 
-                            model_type = "sl")
-}
+# df_list <- list()
+# for (i in 1:N_round){
+#   df_list[[i]] <- simu_nonp(n = n_sample, 
+#                             df = df, 
+#                             g_fit = res_sl$g_fit_sl, 
+#                             Q_fit = res_sl$Q_fit_sl, 
+#                             rv = res_sl$rv_sl , 
+#                             model_type = "sl")
+# }
+# saveRDS(df_list, paste0(here(), "/results/df_list_sl_500.RDS"))
+# saveRDS(df_list, paste0(here(), "/results/df_list_sl_1000.RDS"))
 
+df_list <- readRDS(paste0(here(), "/results/df_list_sl_",n_sample,".RDS"))
 
 # parallel set up
 registerDoFuture()
