@@ -3,6 +3,7 @@ source(paste0(here(), "/0_config.R"))
 source(paste0(here(), "/1_hal_undersmooth.R"))
 source(paste0(here(), "/2_estimation_function.R"))
 
+# parallel set up
 registerDoFuture()
 nCoresPerNode <- floor(as.numeric(Sys.getenv("SLURM_CPUS_ON_NODE"))/2)
 nodeNames <-strsplit(Sys.getenv("SLURM_NODELIST"), ",")[[1]]

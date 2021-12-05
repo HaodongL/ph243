@@ -3,14 +3,6 @@ source(paste0(here(), "/0_config.R"))
 source(paste0(here(), "/1_hal_undersmooth.R"))
 source(paste0(here(), "/2_estimation_function.R"))
 
-registerDoFuture()
-nCoresPerNode <- floor(as.numeric(Sys.getenv("SLURM_CPUS_ON_NODE"))/2)
-nodeNames <-strsplit(Sys.getenv("SLURM_NODELIST"), ",")[[1]]
-workers <- rep(nodeNames, each=nCoresPerNode)
-cl = makeCluster(workers, type = "SOCK")
-
-plan(cluster, workers = cl)
-
 
 # registerDoFuture()
 # plan(multisession, workers=floor(2))
@@ -34,6 +26,16 @@ for (i in 1:N_round){
                             rv = res_sl$rv_sl , 
                             model_type = "sl")
 }
+
+
+# parallel set up
+registerDoFuture()
+nCoresPerNode <- floor(as.numeric(Sys.getenv("SLURM_CPUS_ON_NODE"))/2)
+nodeNames <-strsplit(Sys.getenv("SLURM_NODELIST"), ",")[[1]]
+workers <- rep(nodeNames, each=nCoresPerNode)
+cl = makeCluster(workers, type = "SOCK")
+
+plan(cluster, workers = cl)
 
 # run simu
 res <- run_simu(psi_true = res_sl$true_ate_sl, 
