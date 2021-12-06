@@ -65,52 +65,52 @@ run_est <- function(data, node_list, gbound = 0.025, fancy_stack = sl_stack){
 }
 
 
-
-run_simu <- function(psi_true = 0.1153, 
-                     n_sample = 500, 
-                     N_round = 500,
-                     model_type = "para",
-                     df_list = NULL){
-  
-  res_simu <- foreach(i = 1:N_round, .combine = 'rbind') %dorng% {
-    cat('Starting ', i, 'th job.\n', sep = '')
-    
-    if (model_type == "para"){
-      simu_data <- simu_para(n = n_sample)
-    } else {
-      simu_data <- df_list[[i]]
-    }
-    
-    nodes <- list(W = setdiff(names(simu_data), c("A", "Y")),
-                  A = "A",
-                  Y = "Y")
-    
-    res_slest <- run_est(data = simu_data, 
-                         node_list = nodes, 
-                         gbound = 0.025, 
-                         fancy_stack = sl_stack)
-    
-    res_halest <- run_est(data = simu_data, 
-                          node_list = nodes, 
-                          gbound = 0.025, 
-                          fancy_stack = hal_stack)
-    
-    #--- SL res
-    df_res_sl <- extract_res(allres = res_slest)
-    names(df_res_sl) <- paste0(names(df_res_sl), "_sl")
-    
-    #--- HAL res
-    df_res_hal <- extract_res(allres = res_halest)
-    names(df_res_hal) <- paste0(names(df_res_hal), "_hal")
-    
-    df_res_all <- cbind("i" = i,
-                        "psi_true" = psi_true,
-                        df_res_sl,
-                        df_res_hal)
-    df_res_all
-  }
-  return(res_simu)
-}
+# 
+# run_simu <- function(psi_true = 0.1153, 
+#                      n_sample = 500, 
+#                      N_round = 500,
+#                      model_type = "para",
+#                      df_list = NULL){
+#   
+#   res_simu <- foreach(i = 1:N_round, .combine = 'rbind') %dorng% {
+#     cat('Starting ', i, 'th job.\n', sep = '')
+#     
+#     if (model_type == "para"){
+#       simu_data <- simu_para(n = n_sample)
+#     } else {
+#       simu_data <- df_list[[i]]
+#     }
+#     
+#     nodes <- list(W = setdiff(names(simu_data), c("A", "Y")),
+#                   A = "A",
+#                   Y = "Y")
+#     
+#     res_slest <- run_est(data = simu_data, 
+#                          node_list = nodes, 
+#                          gbound = 0.025, 
+#                          fancy_stack = sl_stack)
+#     
+#     res_halest <- run_est(data = simu_data, 
+#                           node_list = nodes, 
+#                           gbound = 0.025, 
+#                           fancy_stack = hal_stack)
+#     
+#     #--- SL res
+#     df_res_sl <- extract_res(allres = res_slest)
+#     names(df_res_sl) <- paste0(names(df_res_sl), "_sl")
+#     
+#     #--- HAL res
+#     df_res_hal <- extract_res(allres = res_halest)
+#     names(df_res_hal) <- paste0(names(df_res_hal), "_hal")
+#     
+#     df_res_all <- cbind("i" = i,
+#                         "psi_true" = psi_true,
+#                         df_res_sl,
+#                         df_res_hal)
+#     df_res_all
+#   }
+#   return(res_simu)
+# }
 
 
 extract_res <- function(allres){
