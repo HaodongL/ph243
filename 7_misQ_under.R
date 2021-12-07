@@ -44,14 +44,14 @@ run_underHAL_g <- function(df){
   # undersmoothing
   # length(hal_init_g$fit_init$coefs[-1]
   #        [which(hal_init_g$fit_init$coefs[-1] != 0)])
-
+  
   undersmooth_g <- undersmooth_hal(X = x,
                                    Y = outcome,
                                    fit_init = hal_init_g$fit_init,
                                    basis_mat = hal_init_g$basis_mat,
                                    Nlam = 20,
                                    family = "binomial")
-
+  
   g_fit <- fit_hal(X = x,
                    Y = outcome,
                    family = "binomial",
@@ -69,7 +69,7 @@ run_underHAL_g <- function(df){
                      prediction_bounds = "default"
                    ),
                    lambda = undersmooth_g$lambda_under)
-
+  
   g_hat <- predict(g_fit, x)
   
   # # temp 
@@ -109,7 +109,7 @@ run_underHAL_g <- function(df){
   # 
   # Qbar1W <- rep(emp_mean1, nrow(df))
   # Qbar0W <- rep(emp_mean0, nrow(df))
-
+  
   
   # update Q
   H_AW <- df$A/g_hat - (1-df$A)/(1-g_hat)
@@ -215,38 +215,38 @@ run_simu_misQ <- function(psi_true = 0.1153,
                           N_round = 500,
                           model_type = "para",
                           df_list = NULL){
-
+  
   res_simu <- foreach(i = 1:N_round, .combine = 'rbind') %dorng% {
     cat('Starting ', i, 'th job.\n', sep = '')
-
+    
     if (model_type == "para"){
       simu_data <- simu_para(n = n_sample)
     } else {
       simu_data <- df_list[[i]]
     }
-
+    
     nodes <- list(W = setdiff(names(simu_data), c("A", "Y")),
                   A = "A",
                   Y = "Y")
-
+    
     res_slest <- run_est_missQ(data = simu_data,
-                         node_list = nodes,
-                         gbound = 0.025,
-                         fancy_stack = sl_stack)
+                               node_list = nodes,
+                               gbound = 0.025,
+                               fancy_stack = sl_stack)
     
     res_halest <- run_underHAL_g(simu_data)
-
+    
     #--- SL res
     df_res_sl <- extract_res(allres = res_slest)
     names(df_res_sl) <- paste0(names(df_res_sl), "_sl")
-
+    
     #--- HAL res
     df_res_hal <- data.frame('tmle' = res_halest$tmle_under, 
                              'tmle_lower' = res_halest$tmle_lower_under, 
                              'tmle_upper' = res_halest$tmle_upper_under)
     
     names(df_res_hal) <- paste0(names(df_res_hal), "_underhal")
-
+    
     df_res_all <- cbind("i" = i,
                         "psi_true" = psi_true,
                         df_res_sl,
