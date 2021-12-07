@@ -22,6 +22,7 @@ library(doRNG)
 # ----------------------------------------
 # Sl set up
 # ----------------------------------------
+lrn_mean <- Lrnr_mean$new()
 lrn_glm <- Lrnr_glm$new()
 lrn_ridge <- Lrnr_glmnet$new(alpha = 0)
 lrn_elastic <- Lrnr_glmnet$new(alpha = 0)

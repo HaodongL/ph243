@@ -1,7 +1,6 @@
 
 source(paste0("~/Repo/ph243/0_config.R"))
 source(paste0("~/Repo/ph243/1_hal_undersmooth.R"))
-source(paste0("~/Repo/ph243/2_estimation_function.R"))
 source(paste0("~/Repo/ph243/7_misQ_under.R"))
 
 # devtools::load_all("/Users/haodongli/Repo/TMLEbootstrap/R")
@@ -25,11 +24,11 @@ N_round = 500
 n_sample = 500
 
 # run simu
-res <- run_simu_misQ(psi_true = 0.1153, 
-                     n_sample = n_sample, 
-                     N_round = N_round,
-                     model_type = "para",
-                     df_list = NULL)
+res <- run_simu(psi_true = 0.1153, 
+                n_sample = n_sample, 
+                N_round = N_round,
+                model_type = "para",
+                df_list = NULL)
 
 
 output_filename <- paste0('~/Repo/ph243/results/', "para_under_", n_sample, "_", Sys.Date(), '.csv')
