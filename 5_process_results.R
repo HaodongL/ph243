@@ -172,15 +172,23 @@ table_results_data <- res_para_boot_500 %>%
 ## misQ undersmooth g
 
 library(dplyr)
-res_para_under_500 <- read.csv(paste0('~/Repo/ph243/results/', "para_under_500_", "2021-12-06", '.csv'))
-res_para_under_1000 <- read.csv(paste0('~/Repo/ph243/results/', "para_under_1000_", "2021-12-06", '.csv'))
+res_para_misQ_500 <- read.csv(paste0('~/Repo/ph243/results/', "para_misQ_500_", "2021-12-07", '.csv'))
+res_para_misQ_1000 <- read.csv(paste0('~/Repo/ph243/results/', "para_misQ_1000_", "2021-12-07", '.csv'))
+res_para_under_500 <- read.csv(paste0('~/Repo/ph243/results/', "para_under_500_", "2021-12-07", '.csv'))
+res_para_under_1000 <- read.csv(paste0('~/Repo/ph243/results/', "para_under_1000_", "2021-12-07", '.csv'))
 
 
-res_para_under_500 <- cbind(simu_base = "misQ_500", res_para_under_500)
-res_para_under_1000 <- cbind(simu_base = "misQ_1000", res_para_under_1000)
+
+res_para_misQ_500 <- cbind(simu_base = "misQ_500", res_para_misQ_500)
+res_para_misQ_1000 <- cbind(simu_base = "misQ_1000", res_para_misQ_1000)
+
+res_para_under_500 <- cbind(simu_base = "under_500", res_para_under_500)
+res_para_under_1000 <- cbind(simu_base = "under_1000", res_para_under_1000)
 
 
-result <- dplyr::bind_rows(res_para_under_500 = res_para_under_500,
+result <- dplyr::bind_rows(res_para_misQ_500 = res_para_misQ_500,
+                           res_para_misQ_1000 = res_para_misQ_1000,
+                           res_para_under_500 = res_para_under_500,
                            res_para_under_1000 = res_para_under_1000)
 
 table_results_data <- result %>%
