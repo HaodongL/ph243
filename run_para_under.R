@@ -18,8 +18,8 @@ cl = makeCluster(workers, type = "SOCK")
 plan(cluster, workers = cl)
 print(paste0("nCoresPerNode: ", nCoresPerNode))
 
-registerDoFuture()
-plan(multisession, workers=floor(2))
+# registerDoFuture()
+# plan(multisession, workers=floor(2))
 
 N_round = 500
 n_sample = 500

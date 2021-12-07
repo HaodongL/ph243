@@ -229,7 +229,7 @@ run_simu_misQ <- function(psi_true = 0.1153,
                   A = "A",
                   Y = "Y")
 
-    res_slest <- run_est(data = simu_data,
+    res_slest <- run_est_missQ(data = simu_data,
                          node_list = nodes,
                          gbound = 0.025,
                          fancy_stack = sl_stack)
