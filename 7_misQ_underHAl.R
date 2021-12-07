@@ -1,7 +1,7 @@
 # library(here)
 # source(paste0(here(), "/0_config.R"))
 # source(paste0("~/Repo/ph243/1_hal_undersmooth.R"))
-
+#
 # use undersmoothed HAL for g model when Q model is misspecified
 
 # temp 
