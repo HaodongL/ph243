@@ -42,7 +42,7 @@ table_results_data <- result %>%
                 cvtmle_widthCI_hal = cvtmle_upper_hal-cvtmle_lower_hal,
                 cvaiptw_widthCI_hal = cvaiptw_upper_hal-cvaiptw_lower_hal
   ) %>%
-  dplyr::group_by(simu_base) %>%
+  dplyr::group_by(simu_base, psi_true) %>%
   summarize(tmle_coverage_sl = mean(tmle_proportion_sl),
             cvtmle_coverage_sl = mean(cvtmle_proportion_sl),
             cvaiptw_coverage_sl = mean(cvaiptw_proportion_sl),
@@ -74,9 +74,12 @@ table_results_data <- result %>%
             
             
             # coverage of oracle CI
-            # tmle_oracle = mean(psi_true <= tmle + 1.96*sd(tmle) & psi_true >= tmle - 1.96*sd(tmle)),
-            # cvtmle_oracle = mean(psi_true <= cvtmle + 1.96*sd(cvtmle) & psi_true >= tmle - 1.96*sd(cvtmle)),
-            # cvaiptw_oracle = mean(psi_true <= cvaiptw + 1.96*sd(cvaiptw) & psi_true >= cvaiptw - 1.96*sd(cvaiptw)),
+            tmle_oracle_sl = mean(psi_true <= tmle_sl + 1.96*sd(tmle_sl) & psi_true >= tmle_sl - 1.96*sd(tmle_sl)),
+            cvtmle_oracle_sl = mean(psi_true <= cvtmle_sl + 1.96*sd(cvtmle_sl) & psi_true >= tmle_sl - 1.96*sd(cvtmle_sl)),
+            cvaiptw_oracle_sl = mean(psi_true <= cvaiptw_sl + 1.96*sd(cvaiptw_sl) & psi_true >= cvaiptw_sl - 1.96*sd(cvaiptw_sl)),
+            tmle_oracle_hal = mean(psi_true <= tmle_hal + 1.96*sd(tmle_hal) & psi_true >= tmle_hal - 1.96*sd(tmle_hal)),
+            cvtmle_oracle_hal = mean(psi_true <= cvtmle_hal + 1.96*sd(cvtmle_hal) & psi_true >= tmle_hal - 1.96*sd(cvtmle_hal)),
+            cvaiptw_oracle_hal = mean(psi_true <= cvaiptw_hal + 1.96*sd(cvaiptw_hal) & psi_true >= cvaiptw_hal - 1.96*sd(cvaiptw_hal)),
             
             tmle_meanwidthCI_sl = mean(tmle_widthCI_sl),
             cvtmle_meanwidthCI_sl = mean(cvtmle_widthCI_sl),
@@ -203,7 +206,7 @@ table_results_data <- result %>%
                 cvaiptw_widthCI_sl = cvaiptw_upper_sl-cvaiptw_lower_sl,
                 tmle_widthCI_underhal= tmle_upper_underhal-tmle_lower_underhal
   ) %>%
-  dplyr::group_by(simu_base) %>%
+  dplyr::group_by(simu_base, psi_true) %>%
   summarize(tmle_coverage_sl = mean(tmle_proportion_sl),
             cvtmle_coverage_sl = mean(cvtmle_proportion_sl),
             cvaiptw_coverage_sl = mean(cvaiptw_proportion_sl),
@@ -236,5 +239,6 @@ table_results_data <- result %>%
             tmle_meanwidthCI_underhal = mean(tmle_widthCI_underhal)
   )
 
-
+output_filename <- paste0('~/Repo/ph243/results/', "underhal_tbl", '.csv')
+write.csv(table_results_data, output_filename, row.names = FALSE)
 

@@ -1,0 +1,160 @@
+---
+title: "Untitled"
+author: "Haodong Li"
+date: "12/7/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+rm(list=ls())
+library(dplyr)
+library(tidyr)
+library(kableExtra)
+library(ggplot2)
+```
+
+
+```{r}
+table_results <- read.csv(paste0('~/Repo/ph243/results/', "underhal_tbl", '.csv'))
+```
+
+#wide to long
+```{r, eval=T, echo=FALSE}
+data_long_coverage <- gather(table_results, learner, coverage, tmle_coverage_sl:tmle_coverage_underhal, factor_key=TRUE) %>% select(c(simu_base,psi_true,learner, coverage))
+
+data_long_bias <- gather(table_results, learner, bias, tmle_bias_sl:tmle_bias_underhal, factor_key=TRUE) %>% select(c(bias))
+
+data_long_var <- gather(table_results, learner, var, tmle_var_sl:tmle_var_underhal, factor_key=TRUE) %>% select(c(var))
+
+data_long_mse<- gather(table_results, learner, mse, tmle_mse_sl:tmle_mse_underhal, factor_key=TRUE) %>% select(c(mse))
+
+data_long_aveCI<- gather(table_results, learner, aveCI, tmle_meanwidthCI_sl:tmle_meanwidthCI_underhal, factor_key=TRUE) %>% select(c(aveCI))
+
+data_long = cbind(data_long_coverage,
+                  data_long_bias,
+                  data_long_var,
+                  data_long_mse,
+                  data_long_aveCI) %>% 
+  # mutate(rmse = mse/rep(mse[31:40], 7)) %>% 
+  select(c(learner,
+           simu_base,
+           psi_true,
+           var,
+           bias,
+           mse,
+           coverage, 
+           aveCI))
+```
+
+
+```{r, echo=FALSE}
+data_long$var <- format(data_long$var, digits = 2, scientific = TRUE)
+data_long$bias <- format(data_long$bias, digits = 2, scientific = TRUE)
+data_long$mse <- format(data_long$mse, digits = 2, scientific = TRUE)
+data_long$aveCI <- format(data_long$aveCI, digits = 2, scientific = FALSE)
+```
+
+
+```{r, echo=FALSE}
+
+#---
+
+data_long_misQ <- data_long %>%  
+  filter(simu_base %in% c("misQ_500", "misQ_1000")) %>% 
+  select(-psi_true) %>% 
+  mutate(n_sample = rep(c(1000, 500), 4),
+         estimator = c("TMLE (SL)", "TMLE (SL)", 
+                       "CV-TMLE (SL)", "CV-TMLE (SL)", 
+                       "CV-A-IPTW (SL)", "CV-A-IPTW (SL)", 
+                       "TMLE (U-HAL)", "TMLE (U-HAL)")) %>% 
+  select(n_sample, estimator, coverage, aveCI, bias, var, mse) %>% 
+  arrange(n_sample, desc(estimator))
+  
+data_long_under <- data_long %>%  
+  filter(!simu_base %in% c("misQ_500", "misQ_1000")) %>% 
+  select(-psi_true) %>% 
+  mutate(n_sample = rep(c(1000, 500), 4),
+         estimator = c("TMLE (SL)", "TMLE (SL)", 
+                       "CV-TMLE (SL)", "CV-TMLE (SL)", 
+                       "CV-A-IPTW (SL)", "CV-A-IPTW (SL)", 
+                       "TMLE (U-HAL)", "TMLE (U-HAL)")) %>% 
+  select(n_sample, estimator, coverage, aveCI, bias, var, mse) %>% 
+  arrange(n_sample, desc(estimator))
+
+
+```
+
+\newpage
+
+```{r, echo=FALSE}
+#---
+kable(data_long_under, "latex", booktabs = T, 
+      caption = "Performance of TMLE and EE with SL or U-HAL", 
+      align=c('c','l','c','c','c','c','c')) %>% 
+  collapse_rows(columns = 1, latex_hline = "major", valign = "middle")%>%
+  kable_styling(font_size = 9) 
+  # column_spec(1, width = "1.2cm") %>% 
+  # column_spec(2, width = "1.5cm") %>% 
+  # column_spec(7, color = "white",
+  #             background = col_color) 
+```
+
+
+```{r, echo=FALSE}
+kable(data_long_misQ, "latex", booktabs = T, 
+      caption = "Performance of TMLE and EE with SL or U-HAL when Q model is misspecified", 
+      align=c('c','l','c','c','c','c','c')) %>% 
+  collapse_rows(columns = 1, latex_hline = "major", valign = "middle")%>%
+  kable_styling(font_size = 9) 
+  # column_spec(1, width = "1.2cm") %>% 
+  # column_spec(2, width = "1.5cm") %>% 
+  # column_spec(7, color = "white",
+  #             background = col_color)
+```
+
+
+
+```{r, echo=FALSE}
+# plot epsilon
+res_para_misQ_500 <- read.csv(paste0('~/Repo/ph243/results/', "para_misQ_500_", "2021-12-07", '.csv'))
+res_para_misQ_1000 <- read.csv(paste0('~/Repo/ph243/results/', "para_misQ_1000_", "2021-12-07", '.csv'))
+```
+
+```{r, echo=FALSE}
+df_epsilon_500 <- data.frame(i = 1:500, 
+                             epsilon_sl = res_para_misQ_500$epsilon_sl, 
+                             epsilon_hal = res_para_misQ_500$epsilon_underhal)
+
+ggplot(data = df_epsilon_500) +
+  geom_point(aes(x = i, y = epsilon_sl), color = "red") + 
+  geom_point(aes(x = i, y = epsilon_hal)) 
+
+ggplot(data = df_epsilon_500) +
+  geom_point(aes(x = i, y = epsilon_sl - epsilon_hal)) +
+  geom_point(aes(x = i, y = epsilon_sl - epsilon_hal)) 
+
+
+
+
+
+# df_epsilon_1000 <- data.frame(i = 1:500, 
+#                              epsilon_sl = res_para_misQ_1000$epsilon_sl, 
+#                              epsilon_hal = res_para_misQ_1000$epsilon_underhal)
+# 
+# ggplot(data = df_epsilon_1000) +
+#   geom_point(aes(x = i, y = epsilon_sl - epsilon_hal)) +
+#   geom_point(aes(x = i, y = epsilon_sl - epsilon_hal)) 
+# 
+# ggplot(data = df_epsilon_1000) +
+#   geom_point(aes(x = i, y = epsilon_sl), color = "red") + 
+#   geom_point(aes(x = i, y = epsilon_hal)) 
+
+
+```
+
+
+
+
+
